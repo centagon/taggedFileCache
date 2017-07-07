@@ -1,6 +1,6 @@
 <?php
 
-namespace Unikent\Cache;
+namespace Centagon\Cache;
 
 use Illuminate\Cache\FileStore;
 use Illuminate\Filesystem\Filesystem;
@@ -8,82 +8,76 @@ use Illuminate\Filesystem\Filesystem;
 class TaggableFileStore extends FileStore
 {
 
-	public $separator;
-	protected $queue;
+    public $separator;
 
-	/**
-	 * Create a new file cache store instance.
-	 *
-	 * @param  \Illuminate\Filesystem\Filesystem $files
-	 * @param  string $directory
-	 * @param  array $options
-	 */
-	public function __construct(Filesystem $files, $directory, $options)
-	{
-		$defaults = [
-			'separator'=> '~#~',
-			'queue' => null
-		];
+    /**
+     * Create a new file cache store instance.
+     *
+     * @param  Filesystem  $files
+     * @param  string  $directory
+     * @param  array  $options
+     */
+    public function __construct(Filesystem $files, $directory, $options)
+    {
+        $defaults = [
+            'separator' => '~#~',
+        ];
 
-		$options = array_merge($defaults,$options);
+        $options = array_merge($defaults, $options);
 
-		$this->separator = $options['separator'];
-		$this->queue = $options['queue'];
+        $this->separator = $options['separator'];
 
-		parent::__construct($files,$directory);
-	}
+        parent::__construct($files, $directory);
+    }
 
+    /**
+     * Begin executing a new tags operation.
+     *
+     * @param  array|mixed $names
+     * @return \Illuminate\Cache\TaggedCache
+     */
+    public function tags($names)
+    {
+        return new TaggedFileCache($this, new FileTagSet($this, is_array($names) ? $names : func_get_args()));
+    }
 
-	/**
-	 * Get the full path for the given cache key.
-	 *
-	 * @param  string  $key
-	 * @return string
-	 */
-	protected function path($key)
-	{
-		$isTag=false;
-		$split = explode($this->separator,$key);
-		if(count($split) > 1) {
-			$folder = reset($split) . '/';
+    public function flushOldTag($tagId)
+    {
+        foreach ($this->files->directories($this->directory) as $directory) {
+            if (str_contains(basename($directory), $tagId)) {
+                $this->files->deleteDirectory($directory);
+            }
+        }
+    }
 
-			if($folder==='cache_tags/'){
-				$isTag=true;
-			}
-			$key = end($split);
-		}else{
-			$key = reset($split);
-			$folder='';
-		}
-		if($isTag){
-			$hash = $key;
-			$parts = [];
-		}else {
-			$parts = array_slice(str_split($hash = sha1($key), 2), 0, 2);
-		}
+    /**
+     * Get the full path for the given cache key.
+     *
+     * @param  string $key
+     * @return string
+     */
+    protected function path($key)
+    {
+        $isTag = false;
+        $split = explode($this->separator, $key);
+        if (count($split) > 1) {
+            $folder = reset($split) . '/';
 
-		return $this->directory.'/'. $folder . ( count($parts) > 0 ? implode('/', $parts).'/' : '').$hash;
-	}
+            if ($folder === 'cache_tags/') {
+                $isTag = true;
+            }
+            $key = end($split);
+        } else {
+            $key = reset($split);
+            $folder = '';
+        }
+        if ($isTag) {
+            $hash = $key;
+            $parts = [];
+        } else {
+            $parts = array_slice(str_split($hash = sha1($key), 2), 0, 2);
+        }
 
-	/**
-	 * Begin executing a new tags operation.
-	 *
-	 * @param  array|mixed  $names
-	 * @return \Illuminate\Cache\TaggedCache
-	 */
-	public function tags($names)
-	{
-		return new TaggedFileCache($this, new FileTagSet($this, is_array($names) ? $names : func_get_args()));
-	}
-
-
-	public function flushOldTag($tagId){
-
-		foreach ($this->files->directories($this->directory) as $directory) {
-			if(str_contains(basename($directory),$tagId)){
-				$this->files->deleteDirectory($directory);
-			}
-		}
-
-	}
+        return $this->directory . '/' . $folder . (count($parts) > 0 ? implode('/', $parts) . '/' : '') . $hash;
+    }
 }

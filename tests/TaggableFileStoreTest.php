@@ -1,9 +1,8 @@
 <?php
 
+use Centagon\Cache\TaggedFileCache;
+use Centagon\Cache\TaggableFileStore;
 use Orchestra\Testbench\Contracts\TestCase;
-use Unikent\Cache\TaggableFileStore;
-use Unikent\Cache\TaggableFileCacheServiceProvider;
-use Unikent\Cache\TaggedFileCache;
 
 class TaggableFileStoreTest extends BaseTest
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Unikent\Cache;
+namespace Centagon\Cache;
 
 use Illuminate\Cache\TaggedCache;
 

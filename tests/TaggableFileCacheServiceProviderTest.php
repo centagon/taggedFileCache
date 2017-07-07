@@ -1,6 +1,6 @@
 <?php
 
-use Unikent\Cache\TaggableFileStore;
+use Centagon\Cache\TaggableFileStore;
 
 class TaggableFileCacheServiceProviderTest extends BaseTest
 {

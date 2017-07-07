@@ -7,14 +7,14 @@ This product is publicly available under the terms of the MIT license included i
 ## Installation and Requirements
 First, you'll need to require the package with Composer:
 ```
-composer require unikent/tfilecache
+composer require centagon/tfilecache
 ```
 
 Then, update `config/app.php` by adding an entry for the service provider.
 ```
 'providers' => [
     // ...
-    Unikent\Cache\TaggableFileCacheServiceProvider::class
+    Centagon\Cache\TaggableFileCacheServiceProvider::class
 ];
 ```
 Finally, add the necessary config to  `config\cache.php`. 
